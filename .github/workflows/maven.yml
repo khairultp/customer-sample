@@ -73,30 +73,30 @@ jobs:
           sudo chmod 600 ~/.ssh/known_hosts
         shell: bash
         env:
-          SERVER_HOST: ${{ vars.SSH_HOST }}
-          SERVER_HOST_CLOUDRAYA: ${{ vars.SSH_HOST_CLOUDRAYA }}
-          SERVER_PORT: ${{ vars.SSH_PORT }}
-          SERVER_USERNAME: ${{ vars.SSH_USERNAME }}
+          SERVER_HOST: ${{ secrets.SSH_HOST }}
+          SERVER_HOST_CLOUDRAYA: ${{ secrets.SSH_HOST_CLOUDRAYA }}
+          SERVER_PORT: ${{ secrets.SSH_PORT }}
+          SERVER_USERNAME: ${{ secrets.SSH_USERNAME }}
           SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
-          SSH_KNOWN_HOSTS: ${{vars.SSH_HOST}}
-          SSH_KNOWN_HOSTS_CLOUDRAYA: ${{vars.SSH_HOST_CLOUDRAYA}}
+          SSH_KNOWN_HOSTS: ${{secrets.SSH_HOST}}
+          SSH_KNOWN_HOSTS_CLOUDRAYA: ${{secrets.SSH_HOST_CLOUDRAYA}}
 
       - name: Set all environment variables
         env:
-          SERVER_HOST: ${{ vars.SSH_HOST }}
-          SERVER_HOST_CLOUDRAYA: ${{ vars.SSH_HOST_CLOUDRAYA }}
-          SERVER_PORT: ${{ vars.SSH_PORT }}
-          SERVER_USERNAME: ${{ vars.SSH_USERNAME }}
+          SERVER_HOST: ${{ secrets.SSH_HOST }}
+          SERVER_HOST_CLOUDRAYA: ${{ secrets.SSH_HOST_CLOUDRAYA }}
+          SERVER_PORT: ${{ secrets.SSH_PORT }}
+          SERVER_USERNAME: ${{ secrets.SSH_USERNAME }}
           IMAGE_NAME: customer
           IMAGE_TAG: ${{ github.run_number }}
           CONTAINER_NAME: customer-app
-          CLOUDRAYA_REGISTRY_URL: ${{ vars.CLOUDRAYA_REGISTRY_URL }}
+          CLOUDRAYA_REGISTRY_URL: ${{ secrets.CLOUDRAYA_REGISTRY_URL }}
           CLOUDRAYA_REGISTRY_USERNAME: ${{ secrets.CLOUDRAYA_USERNAME }}
           CLOUDRAYA_REGISTRY_PASSWORD: ${{ secrets.CLOUDRAYA_PASSWORD }}
 
-          APP_SERVER_PORT: ${{ vars.APP_SERVER_PORT_DEV }}
-          APP_ENVIRONMENT: ${{ vars.APP_ENVIRONMENT_DEV }}
-          SPRING_PROFILES_ACTIVE: ${{ vars.SPRING_PROFILES_ACTIVE_DEV }}
+          APP_SERVER_PORT: ${{ secrets.APP_SERVER_PORT_DEV }}
+          APP_ENVIRONMENT: ${{ secrets.APP_ENVIRONMENT_DEV }}
+          SPRING_PROFILES_ACTIVE: ${{ secrets.SPRING_PROFILES_ACTIVE_DEV }}
 
         run: |
           echo CONTAINER_NAME=$CONTAINER_NAME >> .env
@@ -122,10 +122,10 @@ jobs:
       - name: Copy all environment variables to Cloud Raya 2
         uses: appleboy/scp-action@v1.0.0
         with:
-          host: ${{ vars.SSH_HOST_CLOUDRAYA }}
-          username: ${{ vars.SSH_USERNAME }}
+          host: ${{ secrets.SSH_HOST_CLOUDRAYA }}
+          username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ vars.SSH_PORT }}
+          port: ${{ secrets.SSH_PORT }}
           source: "./.env"  # Path to the file on your runner
           target: "~/customer-app"  # Target directory on the server
 
@@ -150,15 +150,15 @@ jobs:
 
       - name: Run the application in Cloud Raya 2
         env:
-          SERVER_HOST: ${{ vars.SSH_HOST_CLOUDRAYA }}
-          SERVER_PORT: ${{ vars.SSH_PORT }}
-          SERVER_USERNAME: ${{ vars.SSH_USERNAME }}
+          SERVER_HOST: ${{ secrets.SSH_HOST_CLOUDRAYA }}
+          SERVER_PORT: ${{ secrets.SSH_PORT }}
+          SERVER_USERNAME: ${{ secrets.SSH_USERNAME }}
           IMAGE_TAG: ${{ github.run_number }}
 
-          APP_SERVER_PORT: ${{ vars.APP_SERVER_PORT_DEV }}
-          APP_ENVIRONMENT: ${{ vars.APP_ENVIRONMENT_DEV }}
-          SPRING_PROFILES_ACTIVE: ${{ vars.SPRING_PROFILES_ACTIVE_DEV }}
-          CLOUDRAYA_REGISTRY_URL: ${{ vars.CLOUDRAYA_REGISTRY_URL }}
+          APP_SERVER_PORT: ${{ secrets.APP_SERVER_PORT_DEV }}
+          APP_ENVIRONMENT: ${{ secrets.APP_ENVIRONMENT_DEV }}
+          SPRING_PROFILES_ACTIVE: ${{ secrets.SPRING_PROFILES_ACTIVE_DEV }}
+          CLOUDRAYA_REGISTRY_URL: ${{ secrets.CLOUDRAYA_REGISTRY_URL }}
           CLOUDRAYA_REGISTRY_USERNAME: ${{ secrets.CLOUDRAYA_USERNAME }}
           CLOUDRAYA_REGISTRY_PASSWORD: ${{ secrets.CLOUDRAYA_PASSWORD }}
 
@@ -188,10 +188,10 @@ jobs:
         env:
           REGISTRY: registry.cloudraya.com/${{ secrets.CLOUDRAYA_USERNAME }}
           TAG: ${{ github.run_number }}
-          NAMESPACE: ${{ vars.K8S_NAMESPACE || 'default' }}
-          USE_PERSISTENT: ${{ vars.K8S_USE_PERSISTENT || 'false' }}
-          USE_INGRESS: ${{ vars.K8S_USE_INGRESS || 'false' }}
-          DOMAIN: ${{ vars.K8S_DOMAIN || '' }}
+          NAMESPACE: ${{ secrets.K8S_NAMESPACE || 'default' }}
+          USE_PERSISTENT: ${{ secrets.K8S_USE_PERSISTENT || 'false' }}
+          USE_INGRESS: ${{ secrets.K8S_USE_INGRESS || 'false' }}
+          DOMAIN: ${{ secrets.K8S_DOMAIN || '' }}
         run: |
           chmod +x deploy-to-k8s.sh
 
@@ -212,8 +212,8 @@ jobs:
 
       - name: Verify deployment
         run: |
-          kubectl get pods -n ${{ vars.K8S_NAMESPACE || 'default' }} -l app=customer-app
-          kubectl get svc -n ${{ vars.K8S_NAMESPACE || 'default' }} -l app=customer-app
-          if [ "${{ vars.K8S_USE_INGRESS || 'false' }}" = "true" ]; then
-            kubectl get ingress -n ${{ vars.K8S_NAMESPACE || 'default' }}
+          kubectl get pods -n ${{ secrets.K8S_NAMESPACE || 'default' }} -l app=customer-app
+          kubectl get svc -n ${{ secrets.K8S_NAMESPACE || 'default' }} -l app=customer-app
+          if [ "${{ secrets.K8S_USE_INGRESS || 'false' }}" = "true" ]; then
+            kubectl get ingress -n ${{ secrets.K8S_NAMESPACE || 'default' }}
           fi
