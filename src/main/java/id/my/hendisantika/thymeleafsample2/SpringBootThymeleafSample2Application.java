@@ -74,7 +74,7 @@ public class SpringBootThymeleafSample2Application {
                 customerRepository.save(customer5);
                 customerRepository.save(customer6);
 
-                log.info("Sample customer data has been initialized.");
+                log.info("Sample customer data has been initialized commit.");
             }
         };
     }
